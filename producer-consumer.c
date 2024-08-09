@@ -87,32 +87,34 @@ int main() {
     srand(time(NULL));
 
     // Declare threads for all types of producers and consumers
+    // We need two threads for each type, for that we create arrays of two threads
     pthread_t producers[2];
     pthread_t consumer_producers[2];
     pthread_t consumers[2];
 
     // Initialize semaphores
+    // We need two buffers, each has two semaphores, one for full slots and one for empty slots
     sem_init(&buffer1_full, 0, 0);
     sem_init(&buffer1_empty, 0, BUFFER_SIZE);
     sem_init(&buffer2_full, 0, 0);
     sem_init(&buffer2_empty, 0, BUFFER_SIZE);
 
     // Create threads
-    for (int i = 0; i < 2; i++) {
-        pthread_create(&producers[i], NULL, producer, (void*)(i + 1));
-        pthread_create(&consumer_producers[i], NULL, first_level_consumer_producer, (void*)(i + 3));
-        pthread_create(&consumers[i], NULL, second_level_consumer, (void*)(i + 5));
+    for (int i = 0; i < 2; i++) { // For loop to create two threads for each type
+        pthread_create(&producers[i], NULL, producer, (void*)(i + 1)); // Calling producer and give IDs 1 and 2
+        pthread_create(&consumer_producers[i], NULL, first_level_consumer_producer, (void*)(i + 3)); // IDs are 3 and 4
+        pthread_create(&consumers[i], NULL, second_level_consumer, (void*)(i + 5)); // IDs are 5 and 6
     }
 
     // Join threads
-    for (int i = 0; i < 2; i++) {
-        pthread_join(producers[i], NULL);
+    for (int i = 0; i < 2; i++) { // For loop to join all the threads that were created
+        pthread_join(producers[i], NULL); // Using pthread_join with arguments, of the thread and NULL to ignore exit status
         pthread_join(consumer_producers[i], NULL);
         pthread_join(consumers[i], NULL);
     }
 
     // Destroy semaphores
-    sem_destroy(&buffer1_full);
+    sem_destroy(&buffer1_full); // Using sem_destroy and sending each of the semaphores as argument to destroy them
     sem_destroy(&buffer1_empty);
     sem_destroy(&buffer2_full);
     sem_destroy(&buffer2_empty);
